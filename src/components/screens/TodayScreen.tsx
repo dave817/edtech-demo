@@ -15,9 +15,9 @@ export function TodayScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Rout
         <div className="eyebrow" style={{ marginBottom: 6 }}>
           {lang === "zh" ? "第 21 週 · 第 142 天" : "Week 21 · Day 142"}
         </div>
-        <h1 className="serif" style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 600 }}>
+        <h2 className="serif" style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 600 }}>
           {lang === "zh" ? `早安，${STUDENT.shortName.zh}。` : `Good morning, ${STUDENT.shortName.en}.`}
-        </h1>
+        </h2>
         <p style={{ margin: 0, color: "var(--ink-2)", fontSize: 14.5, lineHeight: 1.6, maxWidth: 720 }}>
           {t.heroLine} {lang === "zh" ? "今日重點：寫作（你最弱的能力）。" : "Today's focus: Writing — your weakest skill on the radar."}
         </p>
