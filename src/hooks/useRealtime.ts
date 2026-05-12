@@ -86,7 +86,8 @@ export function useRealtime(options: UseRealtimeOptions) {
       if (!sessionRes.ok) {
         throw new Error(sessionJson.error || "Failed to start session");
       }
-      const token: string | undefined = sessionJson?.client_secret?.value;
+      // GA Realtime API returns the ephemeral token directly as client_secret (string, "ek_...")
+      const token: string | undefined = sessionJson?.client_secret;
       const model: string = sessionJson?.model || "gpt-realtime-2";
       if (!token) throw new Error("No ephemeral token returned from server");
 

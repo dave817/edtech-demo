@@ -33,37 +33,51 @@ export async function POST(req: Request) {
   const instructions = getSpeakingPrompt(mode, bandTarget, strictness, accent);
   const voice = accentToVoice(accent);
 
+  // GA Realtime API: POST /v1/realtime/client_secrets
+  // The legacy /v1/realtime/sessions endpoint only accepts beta models like gpt-4o-realtime-preview.
+  // gpt-realtime / gpt-realtime-2 (GA) require this newer endpoint with the session-nested shape.
+  const sessionBody = {
+    expires_after: { anchor: "created_at", seconds: 600 },
+    session: {
+      type: "realtime",
+      model: MODELS.realtime,
+      instructions,
+      audio: {
+        input: {
+          transcription: { model: "whisper-1" },
+          turn_detection: {
+            type: "server_vad",
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 700,
+          },
+        },
+        output: { voice },
+      },
+    },
+  };
+
   try {
-    const resp = await fetch("https://api.openai.com/v1/realtime/sessions", {
+    const resp = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: MODELS.realtime,
-        voice,
-        modalities: ["audio", "text"],
-        instructions,
-        input_audio_transcription: { model: "whisper-1" },
-        turn_detection: {
-          type: "server_vad",
-          threshold: 0.5,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 700,
-        },
-      }),
+      body: JSON.stringify(sessionBody),
     });
 
     const data = await resp.json();
     if (!resp.ok) {
-      return NextResponse.json({ error: data.error?.message || "Failed to create realtime session", details: data }, { status: resp.status });
+      const msg = data?.error?.message || "Failed to create realtime session";
+      return NextResponse.json({ error: msg, details: data }, { status: resp.status });
     }
+    // GA response shape: { value: "ek_...", expires_at: number, session: {...} }
     return NextResponse.json({
-      client_secret: data.client_secret,
-      model: data.model || MODELS.realtime,
+      client_secret: data.value,
+      expires_at: data.expires_at,
+      model: data.session?.model || MODELS.realtime,
       voice,
-      instructions,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

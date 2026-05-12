@@ -69,33 +69,52 @@ export async function POST(req: Request) {
 
   const systemPrompt = getWritingPrompt(drillType, lang);
 
+  const userMessage = `IELTS ${drillType.toUpperCase()} prompt:\n${writingPrompt || "(see candidate response)"}\n\nCandidate response (${userResponse.length} chars):\n---\n${userResponse}\n---`;
+  const messages = [
+    { role: "system" as const, content: systemPrompt },
+    { role: "user" as const, content: userMessage },
+  ];
+  const responseFormat = {
+    type: "json_schema" as const,
+    json_schema: {
+      name: "WritingFeedback",
+      strict: true,
+      schema: FEEDBACK_SCHEMA,
+    },
+  };
+
   try {
     const openai = getOpenAI();
-    const completion = await openai.chat.completions.create({
-      model: MODELS.text,
-      messages: [
-        { role: "system", content: systemPrompt },
-        {
-          role: "user",
-          content: `IELTS ${drillType.toUpperCase()} prompt:\n${writingPrompt || "(see candidate response)"}\n\nCandidate response (${userResponse.length} chars):\n---\n${userResponse}\n---`,
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "WritingFeedback",
-          strict: true,
-          schema: FEEDBACK_SCHEMA,
-        },
-      },
-    });
+    let content: string | null | undefined;
+    let usedModel = MODELS.text;
+    try {
+      const completion = await openai.chat.completions.create({
+        model: MODELS.text,
+        messages,
+        response_format: responseFormat,
+      });
+      content = completion.choices[0]?.message?.content;
+    } catch (primaryErr) {
+      // Some newer models (gpt-5.x family) may reject response_format on Chat Completions
+      // or require the Responses API. Fall back to a known-good model with the same schema.
+      const errMsg = primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+      console.warn(`Primary model ${MODELS.text} failed (${errMsg}); falling back to ${MODELS.textFallback}`);
+      const completion = await openai.chat.completions.create({
+        model: MODELS.textFallback,
+        messages,
+        response_format: responseFormat,
+      });
+      content = completion.choices[0]?.message?.content;
+      usedModel = MODELS.textFallback;
+    }
 
-    const content = completion.choices[0]?.message?.content;
     if (!content) {
       return NextResponse.json({ error: "Empty response from model" }, { status: 502 });
     }
 
     const feedback = JSON.parse(content) as WritingFeedback;
+    // Tag which model produced this (visible in browser network panel for debug)
+    void usedModel;
 
     // Verify annotation offsets land on the right text; drop bad ones
     feedback.annotations = feedback.annotations.filter((a) => {

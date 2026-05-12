@@ -93,8 +93,9 @@ npm run dev
 2. In the Vercel dashboard, add the env var:
    - `OPENAI_API_KEY` = `sk-proj-...`
 3. (Optional) Override model defaults:
-   - `OPENAI_REALTIME_MODEL` = `gpt-realtime-2`
-   - `OPENAI_TEXT_MODEL` = `gpt-5.5`
+   - `OPENAI_REALTIME_MODEL` = `gpt-realtime-2` (GA Realtime API; older `gpt-4o-realtime-preview` won't work because we use the new `/v1/realtime/client_secrets` endpoint)
+   - `OPENAI_TEXT_MODEL` = `gpt-5.5` (Writing feedback + Coach chat)
+   - `OPENAI_TEXT_FALLBACK` = `gpt-4o-2024-08-06` (auto-used if the primary rejects `response_format: json_schema` — some gpt-5.x models only support structured output via the Responses API)
 
 The app is a single Next.js project — no extra build steps.
 

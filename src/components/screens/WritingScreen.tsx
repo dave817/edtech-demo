@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import type { Lang, Annotation, WritingFeedback, WritingDrillType } from "@/lib/types";
+import { useRef, useState, type ReactNode } from "react";
+import type { Lang, Annotation, ChatMessage, WritingFeedback, WritingDrillType } from "@/lib/types";
 import { L } from "@/lib/i18n";
 import { Icon } from "../ui/Icon";
 import { Bar } from "../ui/Primitives";
+import { COACH_DATA } from "@/lib/coachData";
 import { SAMPLE_ESSAY, SAMPLE_FEEDBACK } from "@/lib/seed";
 
 const TYPE_COLOR: Record<Annotation["type"], string> = {
@@ -69,6 +70,7 @@ export function WritingScreen({ lang }: { lang: Lang }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<number>(0);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const onSubmit = async () => {
     setError(null);
@@ -267,9 +269,22 @@ export function WritingScreen({ lang }: { lang: Lang }) {
                 ))}
               </div>
             </div>
+            <button className="btn btn-primary" onClick={() => setChatOpen(true)}>
+              <Icon name="sparkles" size={14} /> {t.reviseCoach}
+            </button>
           </div>
         )}
       </div>
+
+      {/* Revise-with-coach overlay (Argument coach, streaming) */}
+      {chatOpen && displayedFeedback && (
+        <ReviseChat
+          lang={lang}
+          essay={displayedEssay}
+          feedback={displayedFeedback}
+          onClose={() => setChatOpen(false)}
+        />
+      )}
 
       {/* Right: rubric + comments */}
       <div className="col gap-4" style={{ minHeight: 0 }}>
@@ -409,6 +424,223 @@ export function WritingScreen({ lang }: { lang: Lang }) {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ReviseChat({
+  lang,
+  essay,
+  feedback,
+  onClose,
+}: {
+  lang: Lang;
+  essay: string;
+  feedback: WritingFeedback;
+  onClose: () => void;
+}) {
+  const t = L(lang);
+  const c = COACH_DATA.argument;
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const summary =
+      lang === "zh"
+        ? `老師你好。AI 已評改我的 Task 2，分數 ${feedback.overallBand.toFixed(1)}。三大改善重點：${feedback.topAreas.slice(0, 3).join("、")}。請陪我修改首段。`
+        : `Hi coach. The AI graded my Task 2 at band ${feedback.overallBand.toFixed(1)}. Top 3 areas to improve: ${feedback.topAreas.slice(0, 3).join("; ")}. Can you help me strengthen the opening paragraph?`;
+    return [{ role: "user", content: summary }];
+  });
+  const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Auto-send the first message on mount
+  const sent = useRef(false);
+  if (!sent.current) {
+    sent.current = true;
+    void send(messages, true);
+  }
+
+  async function send(history: ChatMessage[], skipAppend = false) {
+    if (!skipAppend) {
+      if (!input.trim()) return;
+      history = [...history, { role: "user", content: input.trim() }];
+      setMessages([...history, { role: "assistant", content: "" }]);
+      setInput("");
+    } else {
+      setMessages([...history, { role: "assistant", content: "" }]);
+    }
+    setStreaming(true);
+    setError(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const augmentedSystem: ChatMessage[] = [
+        {
+          role: "user",
+          content:
+            (lang === "zh" ? "以下是 AI 評改的文章內容（給你參考）：\n" : "Here is the essay being revised (for your context):\n") +
+            essay,
+        },
+        ...history,
+      ];
+      const res = await fetch("/api/coaches/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coachId: "argument", lang, messages: augmentedSystem }),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({ error: "Chat request failed" }));
+        throw new Error(j.error || "Chat request failed");
+      }
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No response stream");
+      let buf = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf("\n\n")) >= 0) {
+          const chunk = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 2);
+          if (chunk.startsWith("data:")) {
+            try {
+              const ev = JSON.parse(chunk.replace(/^data:\s*/, ""));
+              if (ev.delta) {
+                setMessages((prev) => {
+                  const copy = [...prev];
+                  const last = copy[copy.length - 1];
+                  if (last && last.role === "assistant") {
+                    copy[copy.length - 1] = { ...last, content: last.content + ev.delta };
+                  }
+                  return copy;
+                });
+              }
+              if (ev.error) setError(ev.error);
+            } catch {
+              /* ignore */
+            }
+          }
+        }
+      }
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 20,
+        right: 20,
+        width: 400,
+        maxWidth: "calc(100vw - 40px)",
+        height: 540,
+        maxHeight: "calc(100vh - 40px)",
+        background: "var(--surface)",
+        border: "1px solid var(--border-strong)",
+        borderRadius: 12,
+        boxShadow: "var(--shadow-lg)",
+        display: "flex",
+        flexDirection: "column",
+        zIndex: 45,
+      }}
+    >
+      <div
+        className="row gap-2"
+        style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--border)",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: c.bg,
+            color: `oklch(0.34 0.1 ${c.hue})`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 700,
+            fontSize: 12,
+            border: `1px solid oklch(0.86 0.04 ${c.hue})`,
+          }}
+        >
+          {c.initials}
+        </div>
+        <div className="grow">
+          <div className="eyebrow" style={{ color: `oklch(0.45 0.1 ${c.hue})`, fontSize: 9 }}>
+            {lang === "zh" ? c.stageZh : c.stageEn}
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name[lang]}</div>
+        </div>
+        <button className="btn-ghost" onClick={onClose} style={{ width: 26, height: 26, borderRadius: 6 }}>
+          <Icon name="x" size={14} />
+        </button>
+      </div>
+      <div style={{ flex: 1, overflow: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            className="row gap-2"
+            style={{
+              flexDirection: m.role === "user" ? "row-reverse" : "row",
+              alignItems: "flex-end",
+            }}
+          >
+            <div className={`bubble ${m.role === "user" ? "bubble-user" : "bubble-bot"}`} style={{ fontSize: 13, padding: "10px 12px" }}>
+              {m.content || (streaming && i === messages.length - 1 ? <em style={{ opacity: 0.5 }}>{t.coachThinking}</em> : "")}
+            </div>
+          </div>
+        ))}
+        {error && (
+          <div style={{ padding: 8, fontSize: 11, color: "var(--bad)" }}>
+            <Icon name="warn" size={11} /> {error}
+          </div>
+        )}
+      </div>
+      <div className="row gap-2" style={{ padding: 12, borderTop: "1px solid var(--border)" }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send(messages.filter((m) => m.content));
+            }
+          }}
+          placeholder={t.askCoach}
+          disabled={streaming}
+          style={{
+            flex: 1,
+            padding: "8px 12px",
+            border: "1px solid var(--border-strong)",
+            borderRadius: 6,
+            fontSize: 13,
+            background: "var(--surface)",
+            color: "var(--ink)",
+          }}
+        />
+        <button
+          className="btn btn-primary"
+          style={{ padding: "8px 12px" }}
+          onClick={() => send(messages.filter((m) => m.content))}
+          disabled={streaming || !input.trim()}
+        >
+          <Icon name="send" size={12} />
+        </button>
       </div>
     </div>
   );

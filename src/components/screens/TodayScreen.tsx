@@ -88,6 +88,60 @@ export function TodayScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Rout
             </div>
           </div>
 
+          {/* Cross-skill bridge card */}
+          <button
+            onClick={() => setRoute("library")}
+            className="card lift"
+            style={{
+              padding: 20,
+              textAlign: "left",
+              display: "flex",
+              alignItems: "center",
+              gap: 18,
+              background: "color-mix(in oklch, var(--xp) 6%, var(--surface))",
+              border: "1px solid color-mix(in oklch, var(--xp) 22%, var(--border))",
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 12,
+                background: "color-mix(in oklch, var(--xp) 18%, var(--surface))",
+                color: "color-mix(in oklch, var(--xp) 55%, var(--ink))",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Icon name="sound" size={22} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="eyebrow" style={{ color: "color-mix(in oklch, var(--xp) 50%, var(--ink-2))" }}>
+                {t.crossSkill}
+              </div>
+              <div className="serif" style={{ margin: "4px 0 4px", fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>
+                {lang === "zh"
+                  ? "今日聆聽：「網絡監控」相關片段"
+                  : "Today's listening: clips about online surveillance"}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--ink-3)", lineHeight: 1.5 }}>
+                {lang === "zh"
+                  ? "三段你昨晚寫作文章相關的真實英語片段（5 分鐘）。修正過的句子已加入聆聽庫。"
+                  : "3 authentic clips related to your last essay (~5 min). Your corrected sentences are queued in the Listening Library."}
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+              <span className="pill pill-soft" style={{ background: "color-mix(in oklch, var(--xp) 18%, var(--surface))", color: "color-mix(in oklch, var(--xp) 55%, var(--ink))" }}>
+                <Icon name="play" size={10} /> 5 {t.minutes}
+              </span>
+              <span style={{ fontSize: 10, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: ".06em", fontWeight: 600 }}>
+                {lang === "zh" ? "聽 + 讀" : "Listen + Read"}
+              </span>
+            </div>
+          </button>
+
           {/* Recent feedback */}
           <div className="card" style={{ padding: 22 }}>
             <div className="row" style={{ justifyContent: "space-between", marginBottom: 14, alignItems: "center" }}>
