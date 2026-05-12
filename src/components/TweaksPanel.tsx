@@ -98,8 +98,13 @@ export function TweaksPanel({ tweaks, setTweak, setRoute, route }: TweaksPanelPr
                   {lang === "zh" ? "客製化" : "Customise"}
                 </h3>
               </div>
-              <button className="btn-ghost" onClick={() => setOpen(false)} style={{ width: 28, height: 28 }}>
-                <Icon name="x" size={16} />
+              <button
+                className="btn-ghost"
+                onClick={() => setOpen(false)}
+                aria-label="Close demo controls"
+                style={{ width: 44, height: 44, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <Icon name="x" size={18} />
               </button>
             </div>
 
