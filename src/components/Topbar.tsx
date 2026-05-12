@@ -78,29 +78,10 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
         )}
       </div>
 
-      <div
-        className="topbar-mobile-hide"
-        style={{ flex: 1, maxWidth: 360, position: "relative", marginLeft: 20, alignSelf: "center" }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "5px 10px",
-            background: "transparent",
-            borderBottom: "1px solid var(--border-strong)",
-          }}
-        >
-          <Icon name="search" size={14} stroke={1.5} />
-          <span style={{ fontSize: 12.5, color: "var(--ink-3)", flex: 1, fontStyle: "italic" }} className="serif">
-            {t.search}
-          </span>
-          <span className="mono" style={{ fontSize: 10, color: "var(--ink-3)" }}>
-            {t.cmd}
-          </span>
-        </div>
-      </div>
+      {/* Search intentionally omitted — the prior visual placeholder
+          promised behavior we never wired up. Re-add once filter
+          across Practice/Library/Coaches actually works. */}
+      <div className="topbar-mobile-hide" style={{ flex: 1 }} aria-hidden="true" />
 
       <div
         className="row gap-2 topbar-mobile-hide"
