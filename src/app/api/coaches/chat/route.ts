@@ -1,0 +1,80 @@
+import type { ChatMessage, CoachId, Lang } from "@/lib/types";
+import { getCoachPrompt } from "@/lib/coachData";
+import { getOpenAI, MODELS } from "@/lib/openai";
+
+export const runtime = "nodejs";
+
+interface ChatRequest {
+  coachId: CoachId;
+  lang: Lang;
+  messages: ChatMessage[];
+}
+
+export async function POST(req: Request) {
+  if (!process.env.OPENAI_API_KEY) {
+    return new Response(JSON.stringify({ error: "OPENAI_API_KEY is not configured on the server." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  let body: ChatRequest;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const { coachId, lang, messages } = body;
+  const systemPrompt = getCoachPrompt(coachId, lang);
+
+  try {
+    const openai = getOpenAI();
+    const stream = await openai.chat.completions.create({
+      model: MODELS.text,
+      stream: true,
+      max_completion_tokens: 800,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.map((m) => ({ role: m.role, content: m.content })),
+      ],
+    });
+
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            const delta = chunk.choices[0]?.delta?.content;
+            if (delta) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`));
+            }
+          }
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+          controller.close();
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: msg })}\n\n`));
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: `Chat error: ${msg}` }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
