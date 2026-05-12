@@ -320,10 +320,13 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
               >
                 <div className="row gap-2" style={{ marginBottom: 6 }}>
                   <Icon name="warn" size={14} />
-                  <b>{lang === "zh" ? "連線錯誤" : "Connection error"}</b>
+                  <b>{lang === "zh" ? "無法開始練習" : "Couldn't start session"}</b>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{error}</div>
-                <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6 }}>{t.apiError}</div>
+                {/* Only show the API-key hint when the error actually came from the server */}
+                {/OPENAI_API_KEY|api key|unauthorized|invalid_api_key/i.test(error || "") && (
+                  <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6 }}>{t.apiError}</div>
+                )}
               </div>
             )}
           </div>

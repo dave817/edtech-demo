@@ -120,9 +120,12 @@ export function useRealtime(options: UseRealtimeOptions) {
         };
       }
 
-      // 4. Mic
+      // 4. Mic. Use permissive constraints — strict sampleRate/channelCount can
+      // produce NotFoundError ("Requested device not found") on systems whose
+      // default device doesn't advertise the requested rate. WebRTC handles
+      // resampling internally.
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { sampleRate: 24000, channelCount: 1, echoCancellation: true, noiseSuppression: true },
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       streamRef.current = stream;
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
@@ -215,7 +218,16 @@ export function useRealtime(options: UseRealtimeOptions) {
       const answerSdp = await sdpResponse.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+      // Map common browser errors to actionable messages so users know which side to fix.
+      let msg = err instanceof Error ? err.message : String(err);
+      const name = err instanceof Error ? err.name : "";
+      if (name === "NotFoundError" || /Requested device not found/i.test(msg)) {
+        msg = "No microphone detected. Plug one in (or grant browser access) and try again. (This is a browser-side issue — your API key is fine.)";
+      } else if (name === "NotAllowedError" || /Permission denied/i.test(msg)) {
+        msg = "Microphone permission denied. Click the mic/lock icon in the address bar to allow access.";
+      } else if (name === "NotReadableError") {
+        msg = "Microphone is in use by another app. Close other apps using the mic and try again.";
+      }
       setError(msg);
       setStatus("error");
       stop();

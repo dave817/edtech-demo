@@ -37,7 +37,9 @@ export async function POST(req: Request) {
     const stream = await openai.chat.completions.create({
       model: MODELS.text,
       stream: true,
-      max_tokens: 800,
+      // gpt-5.x reasoning models require max_completion_tokens, not max_tokens.
+      // Older models (gpt-4o etc) accept either; we use the future-proof name.
+      max_completion_tokens: 800,
       messages: [
         { role: "system", content: systemPrompt },
         ...messages.map((m) => ({ role: m.role, content: m.content })),
