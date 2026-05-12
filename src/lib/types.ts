@@ -26,7 +26,7 @@ export interface Annotation {
   type: AnnotationType;
   text: string;
   why: string;
-  fix?: string;
+  fix?: string | null;
 }
 
 export interface WritingFeedback {

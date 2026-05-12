@@ -34,14 +34,16 @@ const FEEDBACK_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["start", "end", "type", "text", "why"],
+        // strict mode requires EVERY property to be in required.
+        // Use ["string","null"] for optional fields and let the model emit null.
+        required: ["start", "end", "type", "text", "why", "fix"],
         properties: {
           start: { type: "integer" },
           end: { type: "integer" },
           type: { type: "string", enum: ["grammar", "lexical", "cohesion", "task"] },
           text: { type: "string" },
           why: { type: "string" },
-          fix: { type: "string" },
+          fix: { type: ["string", "null"] },
         },
       },
     },

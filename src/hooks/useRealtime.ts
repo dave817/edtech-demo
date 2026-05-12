@@ -187,11 +187,14 @@ export function useRealtime(options: UseRealtimeOptions) {
         }
       }
 
-      // 6. SDP offer → POST to OpenAI Realtime
+      // 6. SDP offer → POST to OpenAI Realtime GA WebRTC endpoint
+      // Beta endpoint was POST /v1/realtime?model=<model> — that path rejects GA client secrets
+      // with "API version mismatch". The GA endpoint is /v1/realtime/calls and the model is already
+      // bound to the client secret (set via session.model in client_secrets call), so no query needed.
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const sdpResponse = await fetch(`https://api.openai.com/v1/realtime?model=${encodeURIComponent(model)}`, {
+      const sdpResponse = await fetch(`https://api.openai.com/v1/realtime/calls`, {
         method: "POST",
         body: offer.sdp,
         headers: {
@@ -203,6 +206,8 @@ export function useRealtime(options: UseRealtimeOptions) {
         const errText = await sdpResponse.text();
         throw new Error(`Realtime SDP exchange failed: ${errText}`);
       }
+      // Avoid lint: model is bound to the client secret server-side, so the value is informational only.
+      void model;
       const answerSdp = await sdpResponse.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
     } catch (err) {
