@@ -338,6 +338,16 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
             <button
               onClick={onToggleSession}
               className="btn"
+              aria-label={
+                isLive
+                  ? lang === "zh"
+                    ? "暫停練習"
+                    : "Pause session"
+                  : lang === "zh"
+                    ? "開始口說練習"
+                    : "Start speaking session"
+              }
+              aria-pressed={isLive}
               style={{
                 width: 52,
                 height: 52,
