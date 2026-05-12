@@ -71,13 +71,32 @@ export function useRealtime(options: UseRealtimeOptions) {
     setSecondsLeft(SESSION_LIMIT_MS / 1000);
 
     try {
-      // GA Realtime flow:
-      // 1. Build the WebRTC peer + mic stream locally and createOffer.
-      // 2. POST the SDP offer to OUR server (/api/realtime/sdp), which proxies it
-      //    via multipart/form-data to https://api.openai.com/v1/realtime/calls with
-      //    the session config attached. The API key stays server-side.
-      // 3. The server returns the SDP answer as plain text; we setRemoteDescription.
-      // (No ephemeral client_secret step — it's not used in this proxied flow.)
+      // GA Realtime browser WebRTC flow:
+      //   1. Server mints ephemeral via POST /v1/realtime/client_secrets (session config inside)
+      //   2. Browser POSTs SDP offer directly to https://api.openai.com/v1/realtime
+      //      (NO /calls suffix, NO ?model= query — that combo triggers beta routing
+      //      which rejects GA ephemeral tokens with "API version mismatch")
+      //   3. Use ephemeral as Bearer, Content-Type application/sdp
+      //   4. Response body is the SDP answer (text)
+      // The API key stays server-side; only the short-lived ephemeral is exposed.
+
+      const sessionRes = await fetch("/api/realtime/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: options.mode,
+          accent: options.accent,
+          bandTarget: options.bandTarget,
+          strictness: options.strictness,
+        }),
+      });
+      const sessionJson = await sessionRes.json();
+      if (!sessionRes.ok) {
+        const detailMsg = sessionJson?.detail?.error?.message;
+        throw new Error(detailMsg || sessionJson.error || "Failed to start session");
+      }
+      const token: string | undefined = sessionJson?.client_secret;
+      if (!token) throw new Error("No ephemeral token returned from server");
 
       // 2. WebRTC peer
       const pc = new RTCPeerConnection();
@@ -175,29 +194,22 @@ export function useRealtime(options: UseRealtimeOptions) {
         }
       }
 
-      // 6. SDP offer → POST to OUR server which proxies multipart to OpenAI GA endpoint
+      // 6. SDP offer → POST directly to GA Realtime endpoint with ephemeral token
+      // IMPORTANT: bare /v1/realtime (no /calls, no ?model=). Adding either of those
+      // makes the route reject the GA ephemeral with version-mismatch or object-not-found.
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const sdpResponse = await fetch("/api/realtime/sdp", {
+      const sdpResponse = await fetch("https://api.openai.com/v1/realtime", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sdp: offer.sdp,
-          mode: options.mode,
-          accent: options.accent,
-          bandTarget: options.bandTarget,
-          strictness: options.strictness,
-        }),
+        body: offer.sdp,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/sdp",
+        },
       });
       if (!sdpResponse.ok) {
-        let errText: string;
-        try {
-          const errJson = await sdpResponse.json();
-          errText = errJson?.detail?.error?.message || errJson?.error || JSON.stringify(errJson);
-        } catch {
-          errText = await sdpResponse.text();
-        }
+        const errText = await sdpResponse.text();
         throw new Error(`Realtime SDP exchange failed: ${errText}`);
       }
       const answerSdp = await sdpResponse.text();
