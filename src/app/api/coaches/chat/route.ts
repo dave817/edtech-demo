@@ -3,6 +3,7 @@ import { getCoachPrompt } from "@/lib/coachData";
 import { getOpenAI, MODELS } from "@/lib/openai";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 interface ChatRequest {
   coachId: CoachId;
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
     const stream = await openai.chat.completions.create({
       model: MODELS.text,
       stream: true,
-      max_completion_tokens: 800,
+      max_tokens: 800,
       messages: [
         { role: "system", content: systemPrompt },
         ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -66,8 +67,9 @@ export async function POST(req: Request) {
     return new Response(readable, {
       headers: {
         "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
+        "Cache-Control": "no-cache, no-transform",
         Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
       },
     });
   } catch (err) {

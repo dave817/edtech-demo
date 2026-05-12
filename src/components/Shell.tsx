@@ -17,6 +17,7 @@ import { NightScreen } from "./screens/NightScreen";
 import { PronScreen } from "./screens/PronScreen";
 import { ProgressScreen } from "./screens/ProgressScreen";
 import { TeacherScreen } from "./screens/TeacherScreen";
+import { TweaksPanel } from "./TweaksPanel";
 import { STUDENT } from "@/lib/seed";
 
 export function Shell() {
@@ -78,6 +79,7 @@ export function Shell() {
         {screens[route]}
         <Footer lang={lang} aiProvider={tweaks.aiProvider} region={tweaks.region} />
       </main>
+      <TweaksPanel tweaks={tweaks} setTweak={setTweak} setRoute={setRoute} route={route} />
     </div>
   );
 }

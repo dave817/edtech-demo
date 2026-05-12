@@ -10,7 +10,7 @@ interface FooterProps {
   region?: string;
 }
 
-export function Footer({ lang, aiProvider = "OpenAI", region = "Hong Kong (asia-east2)" }: FooterProps) {
+export function Footer({ lang, aiProvider = "Claude", region = "Hong Kong (asia-east2)" }: FooterProps) {
   const t = L(lang);
   return (
     <footer

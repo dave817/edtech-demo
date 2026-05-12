@@ -94,12 +94,15 @@ export function useRealtime(options: UseRealtimeOptions) {
       const pc = new RTCPeerConnection();
       pcRef.current = pc;
 
-      // 3. Audio element for remote audio
+      // 3. Audio element for remote audio. Attach to DOM — Safari iOS mutes detached elements.
       if (typeof document !== "undefined") {
         let audio = audioElRef.current;
         if (!audio) {
           audio = document.createElement("audio");
           audio.autoplay = true;
+          audio.style.display = "none";
+          audio.setAttribute("playsinline", "");
+          document.body.appendChild(audio);
           audioElRef.current = audio;
         }
         pc.ontrack = (e) => {

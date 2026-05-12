@@ -10,7 +10,7 @@ const DEFAULTS: Tweaks = {
   lang: "en",
   dark: false,
   navCollapsed: false,
-  aiProvider: "OpenAI",
+  aiProvider: "Claude",
   region: "Hong Kong (asia-east2)",
 };
 

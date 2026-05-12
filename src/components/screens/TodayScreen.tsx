@@ -130,7 +130,7 @@ export function TodayScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Rout
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 500, color: "var(--ink)" }}>{f.title[lang]}</div>
-                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{f.time}</div>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginTop: 2 }}>{f.time[lang]}</div>
                   </div>
                   <span className="pill pill-soft">
                     {t.band} {f.band.toFixed(1)}

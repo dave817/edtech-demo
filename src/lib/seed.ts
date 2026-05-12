@@ -53,13 +53,13 @@ export const MILESTONES: Array<{ id: string; en: string; zh: string; done: boole
 export const RECENT_FEEDBACK: Array<{
   skill: "speaking" | "writing" | "listening" | "reading";
   title: { en: string; zh: string };
-  time: string;
+  time: { en: string; zh: string };
   band: number;
   link: "speaking" | "writing";
 }> = [
-  { skill: "writing", title: { en: "Task 2 · Online surveillance & privacy", zh: "Task 2 · 網絡監控與私隱" }, time: "Today · 14:22", band: 6.0, link: "writing" },
-  { skill: "speaking", title: { en: "Part 2 · Describe an old person", zh: "Part 2 · 描述一位長者" }, time: "Yesterday · 19:40", band: 6.0, link: "speaking" },
-  { skill: "writing", title: { en: "Opening drill · Education in HK", zh: "開頭段練習 · 香港教育" }, time: "2 days ago", band: 6.5, link: "writing" },
+  { skill: "writing", title: { en: "Task 2 · Online surveillance & privacy", zh: "Task 2 · 網絡監控與私隱" }, time: { en: "Today · 14:22", zh: "今日 · 14:22" }, band: 6.0, link: "writing" },
+  { skill: "speaking", title: { en: "Part 2 · Describe an old person", zh: "Part 2 · 描述一位長者" }, time: { en: "Yesterday · 19:40", zh: "昨日 · 19:40" }, band: 6.0, link: "speaking" },
+  { skill: "writing", title: { en: "Opening drill · Education in HK", zh: "開頭段練習 · 香港教育" }, time: { en: "2 days ago", zh: "2 日前" }, band: 6.5, link: "writing" },
 ];
 
 // Teacher view — class of 8 students. Names are realistic HK names.
