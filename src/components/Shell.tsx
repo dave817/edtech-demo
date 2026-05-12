@@ -38,6 +38,7 @@ import { PronScreen } from "./screens/PronScreen";
 import { ProgressScreen } from "./screens/ProgressScreen";
 import { TeacherScreen } from "./screens/TeacherScreen";
 import { TweaksPanel } from "./TweaksPanel";
+import { Onboarding } from "./Onboarding";
 import { STUDENT } from "@/lib/seed";
 
 export function Shell() {
@@ -132,6 +133,7 @@ export function Shell() {
         <Footer lang={lang} aiProvider={tweaks.aiProvider} region={tweaks.region} />
       </main>
       {demoMode && <TweaksPanel tweaks={tweaks} setTweak={setTweak} setRoute={setRoute} route={route} />}
+      <Onboarding lang={lang} />
     </div>
   );
 }
