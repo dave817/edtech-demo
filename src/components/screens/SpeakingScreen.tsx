@@ -324,7 +324,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                 </div>
                 <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{error}</div>
                 {/* Show the server-side hint whenever the error looks like an auth/config problem */}
-                {/(OPENAI_API_KEY|invalid_api_key|unauthorized|server-side hint|incorrect api key|401)/i.test(
+                {/(OPENAI_API_KEY|invalid_api_key|unauthorized|server-side hint|incorrect api key|\b401\b)/i.test(
                   error || "",
                 ) && (
                   <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6 }}>{t.apiError}</div>
@@ -338,15 +338,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
             <button
               onClick={onToggleSession}
               className="btn"
-              aria-label={
-                isLive
-                  ? lang === "zh"
-                    ? "暫停練習"
-                    : "Pause session"
-                  : lang === "zh"
-                    ? "開始口說練習"
-                    : "Start speaking session"
-              }
+              aria-label={micLabel(isLive, lang)}
               aria-pressed={isLive}
               style={{
                 width: 52,
@@ -630,4 +622,9 @@ function formatSec(s: number) {
   const m = Math.floor(s / 60);
   const r = s % 60;
   return `${m}:${r.toString().padStart(2, "0")}`;
+}
+
+function micLabel(isLive: boolean, lang: Lang): string {
+  if (isLive) return lang === "zh" ? "暫停練習" : "Pause session";
+  return lang === "zh" ? "開始口說練習" : "Start speaking session";
 }
