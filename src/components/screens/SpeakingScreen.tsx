@@ -338,9 +338,10 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
           <div className="row gap-3" style={{ padding: "14px 18px", borderTop: "1px solid var(--border)", background: "var(--bg-2)" }}>
             <button
               onClick={onToggleSession}
-              className="btn"
+              className={`btn${isConnecting ? " connecting-pulse" : ""}`}
               aria-label={micLabel(isLive, lang)}
               aria-pressed={isLive}
+              aria-busy={isConnecting}
               style={{
                 width: 52,
                 height: 52,

@@ -125,6 +125,17 @@ input, textarea { font: inherit; color: inherit; }
 .skel { background: linear-gradient(90deg, var(--surface-sunken), color-mix(in oklch, var(--surface-sunken) 60%, var(--border)), var(--surface-sunken)); background-size: 200% 100%; animation: skel 1.4s linear infinite; border-radius: 8px; }
 @keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
+/* Connecting pulse — used on Speaking mic button during SDP negotiation
+   so the user gets continuous feedback that the press registered. */
+.connecting-pulse { animation: connecting-pulse 1.4s ease-in-out infinite; }
+@keyframes connecting-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 40%, transparent); }
+  50%      { box-shadow: 0 0 0 8px color-mix(in oklch, var(--accent) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connecting-pulse { animation: none; }
+}
+
 .modal-backdrop { position: fixed; inset: 0; background: rgba(20,18,12,.45); display:flex; align-items:center; justify-content:center; z-index: 60; padding: 24px; backdrop-filter: blur(2px); }
 [data-theme="dark"] .modal-backdrop { background: rgba(0,0,0,.6); }
 
