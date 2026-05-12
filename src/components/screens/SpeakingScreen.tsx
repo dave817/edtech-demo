@@ -96,8 +96,8 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
         word: "—",
         ipa: "",
         heard: "",
-        note_en: "Speak more to receive Cantonese-L1 pronunciation tips.",
-        note_zh: "多說一些以獲得粵語 L1 發音建議。",
+        note_en: "Start a Speaking session — we'll surface pronunciation tips here as you talk.",
+        note_zh: "開始口說練習 — 我們會在你說話時在這裡顯示發音建議。",
       });
     }
     return tipList;
@@ -580,8 +580,8 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                 />
                 <span>
                   {lang === "zh"
-                    ? "啟用銜接詞守衛（>2 個 / 30 秒 即提示）"
-                    : "Cohesion guard (warn if >2 connectives per 30s)"}
+                    ? "提示銜接詞過度使用（例如「and… and… moreover…」）"
+                    : "Catch connective overuse (e.g., 'and… and… moreover…')"}
                 </span>
               </label>
             </div>

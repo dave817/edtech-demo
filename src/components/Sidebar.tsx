@@ -186,11 +186,7 @@ export function Sidebar({ route, setRoute, collapsed, setCollapsed, lang }: Side
           <div style={{ fontSize: 12, color: "var(--ink-3)", lineHeight: 1.5 }}>
             {lang === "zh" ? "此原型用於與校方委員會作技術示範。" : "A demo prototype for the EdTech committee review."}
           </div>
-          <div style={{ marginTop: 10 }}>
-            <span className="dse-tag">
-              <Icon name="badge" size={12} /> {t.dseReady}
-            </span>
-          </div>
+          {/* HKDSE pill lives in the footer now — removed here to avoid duplicate. */}
         </div>
       )}
     </aside>

@@ -79,7 +79,7 @@ export function TodayScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Rout
                     </span>
                     {!done && (
                       <span className="pill pill-soft">
-                        <Icon name="bolt" size={11} /> {lang === "zh" ? "繼續" : "Resume"}
+                        <Icon name="bolt" size={11} /> {lang === "zh" ? "開始" : "Start"}
                       </span>
                     )}
                   </button>
