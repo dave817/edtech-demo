@@ -323,8 +323,10 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                   <b>{lang === "zh" ? "無法開始練習" : "Couldn't start session"}</b>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{error}</div>
-                {/* Only show the server-side hint when the error genuinely is server-side */}
-                {/(OPENAI_API_KEY|invalid_api_key|unauthorized|server-side hint)/i.test(error || "") && (
+                {/* Show the server-side hint whenever the error looks like an auth/config problem */}
+                {/(OPENAI_API_KEY|invalid_api_key|unauthorized|server-side hint|incorrect api key|401)/i.test(
+                  error || "",
+                ) && (
                   <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6 }}>{t.apiError}</div>
                 )}
               </div>

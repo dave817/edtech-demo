@@ -71,6 +71,20 @@ export function useRealtime(options: UseRealtimeOptions) {
     setSecondsLeft(SESSION_LIMIT_MS / 1000);
 
     try {
+      // Guard: getUserMedia requires a secure context (HTTPS or localhost).
+      // Mobile browsers fail silently or with cryptic errors otherwise; surface
+      // the cause before the request hits the mic.
+      if (typeof window !== "undefined" && !window.isSecureContext) {
+        throw new Error(
+          "Microphone access requires HTTPS. Open this page via https:// (or localhost) — Speaking can't run over plain http on mobile.",
+        );
+      }
+      if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+        throw new Error(
+          "Your browser doesn't support microphone access. Try the latest Chrome, Safari, or Firefox.",
+        );
+      }
+
       // GA Realtime browser WebRTC flow:
       //   1. Server mints ephemeral via POST /v1/realtime/client_secrets (session config inside)
       //   2. Browser POSTs SDP offer directly to https://api.openai.com/v1/realtime
