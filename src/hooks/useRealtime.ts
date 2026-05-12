@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SpeakingMode, TranscriptMessage } from "@/lib/types";
+import type { Lang, SpeakingMode, TranscriptMessage } from "@/lib/types";
 
 export type RealtimeStatus = "idle" | "connecting" | "ready" | "active" | "ended" | "error";
 
@@ -12,6 +12,38 @@ interface UseRealtimeOptions {
   accent: "UK" | "US" | "AU" | "CA";
   bandTarget: number;
   strictness: "Low" | "Medium" | "High";
+  lang?: Lang;
+}
+
+const ERR_COPY = {
+  en: {
+    insecureContext:
+      "Microphone access requires HTTPS. Open this page via https:// (or localhost) — Speaking can't run over plain http on mobile.",
+    noMediaDevices:
+      "Your browser doesn't support microphone access. Try the latest Chrome, Safari, or Firefox.",
+    notFound:
+      "No microphone detected. Plug one in (or grant browser access) and try again. (Browser-side issue, not the server.)",
+    notAllowedMobile:
+      "Microphone permission denied. On iOS Safari, tap 'AA' in the address bar → Website Settings → Microphone → Allow. On Android Chrome, tap the lock icon → Permissions → Microphone → Allow.",
+    notAllowedDesktop:
+      "Microphone permission denied. Click the mic/lock icon in the address bar to allow access.",
+    notReadable: "Microphone is in use by another app. Close other apps using the mic and try again.",
+  },
+  zh: {
+    insecureContext:
+      "麥克風存取需要 HTTPS。請以 https:// 開啟此頁（或 localhost）— 一般 http 在手機上無法使用口說功能。",
+    noMediaDevices: "你的瀏覽器不支援麥克風存取，請改用最新版 Chrome、Safari 或 Firefox。",
+    notFound: "找不到麥克風。請接上麥克風（或允許瀏覽器存取）後再試。（這是瀏覽器端問題，非伺服器問題。）",
+    notAllowedMobile:
+      "麥克風權限被拒。iOS Safari：點選網址列的「AA」→ 網站設定 → 麥克風 → 允許；Android Chrome：點選鎖頭圖示 → 權限 → 麥克風 → 允許。",
+    notAllowedDesktop: "麥克風權限被拒。點選網址列的麥克風／鎖頭圖示以允許存取。",
+    notReadable: "麥克風正被其他應用程式使用。請關閉其他用到麥克風的程式後再試。",
+  },
+} as const;
+
+function isMobile(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 export function useRealtime(options: UseRealtimeOptions) {
@@ -70,19 +102,17 @@ export function useRealtime(options: UseRealtimeOptions) {
     setStatus("connecting");
     setSecondsLeft(SESSION_LIMIT_MS / 1000);
 
+    const copy = ERR_COPY[options.lang ?? "en"];
+
     try {
       // Guard: getUserMedia requires a secure context (HTTPS or localhost).
       // Mobile browsers fail silently or with cryptic errors otherwise; surface
       // the cause before the request hits the mic.
       if (typeof window !== "undefined" && !window.isSecureContext) {
-        throw new Error(
-          "Microphone access requires HTTPS. Open this page via https:// (or localhost) — Speaking can't run over plain http on mobile.",
-        );
+        throw new Error(copy.insecureContext);
       }
       if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-        throw new Error(
-          "Your browser doesn't support microphone access. Try the latest Chrome, Safari, or Firefox.",
-        );
+        throw new Error(copy.noMediaDevices);
       }
 
       // GA Realtime browser WebRTC flow:
@@ -234,21 +264,21 @@ export function useRealtime(options: UseRealtimeOptions) {
       const answerSdp = await sdpResponse.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
     } catch (err) {
-      // Map common browser errors to actionable messages so users know which side to fix.
+      // Map common browser errors to actionable, localized messages.
       let msg = err instanceof Error ? err.message : String(err);
       const name = err instanceof Error ? err.name : "";
       if (name === "NotFoundError" || /Requested device not found/i.test(msg)) {
-        msg = "No microphone detected. Plug one in (or grant browser access) and try again. (Browser-side issue, not the server.)";
+        msg = copy.notFound;
       } else if (name === "NotAllowedError" || /Permission denied/i.test(msg)) {
-        msg = "Microphone permission denied. Click the mic/lock icon in the address bar to allow access.";
+        msg = isMobile() ? copy.notAllowedMobile : copy.notAllowedDesktop;
       } else if (name === "NotReadableError") {
-        msg = "Microphone is in use by another app. Close other apps using the mic and try again.";
+        msg = copy.notReadable;
       }
       setError(msg);
       setStatus("error");
       stop();
     }
-  }, [status, options.mode, options.accent, options.bandTarget, options.strictness, appendOrUpdateMessage, stop]);
+  }, [status, options.mode, options.accent, options.bandTarget, options.strictness, options.lang, appendOrUpdateMessage, stop]);
 
   useEffect(() => {
     return () => {

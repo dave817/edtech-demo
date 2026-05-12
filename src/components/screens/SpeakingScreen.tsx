@@ -46,6 +46,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
     accent,
     bandTarget,
     strictness,
+    lang,
   });
 
   const isLive = status === "ready" || status === "active";
