@@ -21,7 +21,7 @@ export function PracticeScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: R
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+      <div className="card-grid-practice">
         {PRACTICE_CARDS.map((c) => (
           <button
             key={c.id}

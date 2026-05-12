@@ -76,15 +76,8 @@ export function CoachesScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Ro
                 </div>
 
                 <div
-                  className="card lift"
-                  style={{
-                    padding: 22,
-                    opacity: unlocked ? 1 : 0.6,
-                    display: "grid",
-                    gridTemplateColumns: "auto 1fr auto",
-                    gap: 20,
-                    alignItems: "flex-start",
-                  }}
+                  className="card lift coach-card"
+                  style={{ padding: 22, opacity: unlocked ? 1 : 0.6 }}
                 >
                   <div
                     style={{

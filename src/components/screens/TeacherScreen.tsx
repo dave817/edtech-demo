@@ -63,11 +63,9 @@ export function TeacherScreen({ lang }: { lang: Lang }) {
               return (
                 <div
                   key={s.id}
-                  className="row gap-3"
+                  className="roster-row gap-3"
                   style={{
-                    padding: "12px 18px",
                     borderTop: i === 0 ? "none" : "1px solid var(--border)",
-                    alignItems: "center",
                   }}
                 >
                   <Avatar initials={s.initials} hue={s.hue} size={36} />
@@ -86,7 +84,7 @@ export function TeacherScreen({ lang }: { lang: Lang }) {
                   >
                     {w[lang]}
                   </span>
-                  <div style={{ width: 120 }}>
+                  <div className="roster-band">
                     <div className="row" style={{ justifyContent: "space-between", fontSize: 11, color: "var(--ink-3)", marginBottom: 4 }}>
                       <span>{t.band}</span>
                       <span style={{ fontWeight: 600, color: "var(--ink)" }}>

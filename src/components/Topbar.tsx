@@ -78,7 +78,10 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
         )}
       </div>
 
-      <div style={{ flex: 1, maxWidth: 360, position: "relative", marginLeft: 20, alignSelf: "center" }}>
+      <div
+        className="topbar-mobile-hide"
+        style={{ flex: 1, maxWidth: 360, position: "relative", marginLeft: 20, alignSelf: "center" }}
+      >
         <div
           style={{
             display: "flex",
@@ -100,7 +103,7 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
       </div>
 
       <div
-        className="row gap-2"
+        className="row gap-2 topbar-mobile-hide"
         title={t.regularity}
         style={{ alignSelf: "center", color: "var(--ink-2)", paddingRight: 14, borderRight: "1px solid var(--border)" }}
       >
@@ -116,7 +119,7 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
       </div>
 
       <div
-        className="row gap-2"
+        className="row gap-2 topbar-mobile-hide"
         style={{ alignSelf: "center", color: "var(--ink-2)", paddingRight: 14, borderRight: "1px solid var(--border)" }}
       >
         <span

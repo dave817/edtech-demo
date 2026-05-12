@@ -19,7 +19,7 @@ export function LibraryScreen({ lang }: { lang: Lang }) {
             : "Items marked ★ were saved from your past writing or speaking sessions."}
         </p>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
+      <div className="card-grid-auto">
         {LIBRARY_ITEMS.map((item) => (
           <div key={item.id} className="card lift" style={{ padding: 16 }}>
             <div className="row" style={{ justifyContent: "space-between", marginBottom: 10 }}>
