@@ -133,11 +133,16 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
         </span>
       </div>
 
-      <div style={{ display: "inline-flex", alignSelf: "center", border: "1px solid var(--border-strong)" }}>
+      <div
+        className="lang-toggle"
+        style={{ display: "inline-flex", alignSelf: "center", border: "1px solid var(--border-strong)" }}
+      >
         {(["en", "zh"] as Lang[]).map((l) => (
           <button
             key={l}
             onClick={() => setLang(l)}
+            aria-label={l === "en" ? "Switch to English" : "切換到繁體中文"}
+            aria-pressed={lang === l}
             style={{
               padding: "3px 9px",
               fontSize: 11.5,

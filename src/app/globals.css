@@ -250,11 +250,12 @@ input, textarea { font: inherit; color: inherit; }
   main > div { padding-left: 10px !important; padding-right: 10px !important; }
 }
 
-/* Touch-device touch targets — keep desktop tight, only enlarge on touch.
-   Targets the smallest interactive controls audited as <44px tap area. */
-@media (hover: none) and (pointer: coarse) {
+/* Mobile touch targets — keep desktop tight, enlarge on narrow viewports.
+   Width-based query because emulated mobile viewports don't trigger
+   (pointer: coarse). Targets controls audited at <44px tap area. */
+@media (max-width: 900px) {
   /* Language toggle in topbar */
-  main > header > div:has(> button) > button[style*="padding: 3px"] {
+  .lang-toggle button {
     padding: 12px 14px !important;
     min-height: 44px !important;
     min-width: 44px !important;
