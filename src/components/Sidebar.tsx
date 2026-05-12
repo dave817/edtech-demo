@@ -101,7 +101,7 @@ export function Sidebar({ route, setRoute, collapsed, setCollapsed, lang }: Side
           </div>
         )}
         <button
-          className="btn-ghost"
+          className="btn-ghost sidebar-collapse-btn"
           onClick={() => setCollapsed(!collapsed)}
           style={{
             marginLeft: "auto",
@@ -179,7 +179,7 @@ export function Sidebar({ route, setRoute, collapsed, setCollapsed, lang }: Side
       <div style={{ flex: 1 }} />
 
       {!collapsed && (
-        <div style={{ padding: "12px 14px", borderTop: "1px solid var(--border)" }}>
+        <div className="sidebar-footer-card" style={{ padding: "12px 14px", borderTop: "1px solid var(--border)" }}>
           <div className="eyebrow" style={{ marginBottom: 8 }}>
             {lang === "zh" ? "示範版本" : "Demo build"}
           </div>

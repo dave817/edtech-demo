@@ -220,9 +220,10 @@ input, textarea { font: inherit; color: inherit; }
 
   /* Hide the "demo build" filler card on mobile to save vertical space.
      The sidebar collapse button is also redundant when the sidebar
-     is rendered horizontally. */
-  .app aside > div:first-child > button { display: none !important; }
-  .app aside > div:last-child:not(nav) { display: none !important; }
+     is rendered horizontally. Targets named hooks in Sidebar.tsx so
+     future restructure doesn't silently break the rule. */
+  .sidebar-collapse-btn { display: none !important; }
+  .sidebar-footer-card { display: none !important; }
 
   .split-main-side,
   .split-essay,
