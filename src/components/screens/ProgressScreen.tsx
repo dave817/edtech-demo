@@ -21,7 +21,7 @@ export function ProgressScreen({ lang }: { lang: Lang }) {
         <h2 style={{ margin: "4px 0 0", fontSize: 24, fontWeight: 600 }}>{t.nav.progress}</h2>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 20 }}>
+      <div className="split-hero">
         <div className="col gap-4">
           {/* Band trajectory */}
           <div className="card" style={{ padding: 22 }}>

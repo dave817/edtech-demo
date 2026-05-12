@@ -103,7 +103,7 @@ export function WritingScreen({ lang }: { lang: Lang }) {
   const displayedQuestion = tab === "sample" ? SAMPLE_ESSAY.question : "";
 
   return (
-    <div style={{ padding: "20px 28px 4px", display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 20 }}>
+    <div className="split-essay" style={{ padding: "20px 28px 4px" }}>
       {/* Left: Essay */}
       <div className="card" style={{ padding: 0, display: "flex", flexDirection: "column" }}>
         <div className="row gap-2" style={{ padding: "14px 22px", borderBottom: "1px solid var(--border)", alignItems: "center" }}>

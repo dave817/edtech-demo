@@ -23,7 +23,7 @@ export function TodayScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Rout
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 20 }}>
+      <div className="split-hero">
         {/* Left column */}
         <div className="col gap-4">
           {/* Daily mission */}

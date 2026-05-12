@@ -222,7 +222,7 @@ export function useRealtime(options: UseRealtimeOptions) {
       let msg = err instanceof Error ? err.message : String(err);
       const name = err instanceof Error ? err.name : "";
       if (name === "NotFoundError" || /Requested device not found/i.test(msg)) {
-        msg = "No microphone detected. Plug one in (or grant browser access) and try again. (This is a browser-side issue — your API key is fine.)";
+        msg = "No microphone detected. Plug one in (or grant browser access) and try again. (Browser-side issue, not the server.)";
       } else if (name === "NotAllowedError" || /Permission denied/i.test(msg)) {
         msg = "Microphone permission denied. Click the mic/lock icon in the address bar to allow access.";
       } else if (name === "NotReadableError") {

@@ -155,7 +155,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
         })}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 20 }}>
+      <div className="split-main-side">
         {/* Centre */}
         <div className="card" style={{ display: "flex", flexDirection: "column", minHeight: "calc(100vh - 220px)" }}>
           {/* Header */}
@@ -323,8 +323,8 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                   <b>{lang === "zh" ? "無法開始練習" : "Couldn't start session"}</b>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{error}</div>
-                {/* Only show the API-key hint when the error actually came from the server */}
-                {/OPENAI_API_KEY|api key|unauthorized|invalid_api_key/i.test(error || "") && (
+                {/* Only show the server-side hint when the error genuinely is server-side */}
+                {/(OPENAI_API_KEY|invalid_api_key|unauthorized|server-side hint)/i.test(error || "") && (
                   <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 6 }}>{t.apiError}</div>
                 )}
               </div>

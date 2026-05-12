@@ -187,8 +187,49 @@ input, textarea { font: inherit; color: inherit; }
 .sheet-hd { padding: 18px 22px; border-bottom: 1px solid var(--border); }
 .sheet-body { padding: 22px; overflow: auto; }
 
+/* Responsive split-column layouts used across screens */
+.split-main-side { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+.split-essay     { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
+.split-hero      { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+.split-roster    { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.split-phoneme   { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+
 /* Mobile responsive */
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
-  .app aside { position: relative !important; height: auto !important; }
+  .app aside {
+    position: relative !important;
+    height: auto !important;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .app aside nav {
+    flex-direction: row !important;
+    overflow-x: auto;
+    padding: 8px 12px !important;
+  }
+  .app aside nav > div { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0; }
+  .app aside nav > div > div { display: none; }  /* hide group labels */
+
+  .split-main-side,
+  .split-essay,
+  .split-hero,
+  .split-roster,
+  .split-phoneme { grid-template-columns: 1fr !important; }
+
+  /* Topbar tighter on mobile */
+  main > header { padding: 12px 16px 10px !important; gap: 10px !important; }
+  main > header h1 { font-size: 20px !important; }
+
+  /* Generic screen padding tighter on mobile */
+  main > div { padding-left: 14px !important; padding-right: 14px !important; }
+
+  /* Cards & forms */
+  .card { border-radius: var(--radius-card); }
+  textarea { font-size: 14px !important; }
+}
+
+@media (max-width: 480px) {
+  main > header h1 { font-size: 18px !important; }
+  main > div { padding-left: 10px !important; padding-right: 10px !important; }
 }

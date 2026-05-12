@@ -52,7 +52,7 @@ export function PronScreen({ lang }: { lang: Lang }) {
         <p style={{ margin: 0, color: "var(--ink-2)", fontSize: 14, lineHeight: 1.55 }}>{t.pronSub}</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 20 }}>
+      <div className="split-phoneme">
         <div className="col gap-2">
           {PHONEMES.map((ph, i) => (
             <button

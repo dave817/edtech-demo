@@ -43,7 +43,7 @@ export function TeacherScreen({ lang }: { lang: Lang }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }}>
+      <div className="split-roster">
         {/* Roster */}
         <div className="card" style={{ padding: 0 }}>
           <div className="row" style={{ padding: "14px 18px", borderBottom: "1px solid var(--border)", justifyContent: "space-between" }}>
