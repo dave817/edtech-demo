@@ -488,7 +488,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                 <div className="eyebrow" style={{ marginBottom: 6 }}>
                   {lang === "zh" ? "口音" : "Accent"}
                 </div>
-                <div className="row gap-2">
+                <div className="row gap-2 speaking-picker">
                   {(["UK", "US", "AU", "CA"] as const).map((a) => (
                     <button
                       key={a}
@@ -516,7 +516,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                   <span className="eyebrow">{lang === "zh" ? "目標分數" : "Band target"}</span>
                   <span style={{ fontSize: 12.5, fontWeight: 600 }}>{bandTarget.toFixed(1)}</span>
                 </div>
-                <div className="row gap-2">
+                <div className="row gap-2 speaking-picker">
                   {[6, 6.5, 7, 7.5, 8, 8.5, 9].map((b) => (
                     <button
                       key={b}
@@ -543,7 +543,7 @@ export function SpeakingScreen({ lang }: { lang: Lang }) {
                 <div className="eyebrow" style={{ marginBottom: 6 }}>
                   {lang === "zh" ? "嚴格度" : "Strictness"}
                 </div>
-                <div className="row gap-2">
+                <div className="row gap-2 speaking-picker">
                   {(["Low", "Medium", "High"] as const).map((s) => (
                     <button
                       key={s}
