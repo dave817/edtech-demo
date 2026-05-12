@@ -121,7 +121,18 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
         {(["en", "zh"] as Lang[]).map((l) => (
           <button
             key={l}
-            onClick={() => setLang(l)}
+            onClick={() => {
+              // View Transitions API: cross-fade the whole UI on language
+              // change. Falls back to a hard swap on browsers without it.
+              const doc = document as Document & {
+                startViewTransition?: (cb: () => void) => unknown;
+              };
+              if (typeof doc.startViewTransition === "function") {
+                doc.startViewTransition(() => setLang(l));
+              } else {
+                setLang(l);
+              }
+            }}
             aria-label={l === "en" ? "Switch to English" : "切換到繁體中文"}
             aria-pressed={lang === l}
             style={{

@@ -74,6 +74,23 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Safe-area-inset support for notched phones (iPhone X+, modern Android).
+   Without this, the topbar can clip under the notch on iOS Safari and
+   the footer can clip under the home indicator. */
+@supports (padding: env(safe-area-inset-top)) {
+  main > header { padding-top: max(18px, env(safe-area-inset-top)) !important; }
+  main > footer { padding-bottom: max(20px, env(safe-area-inset-bottom)) !important; }
+}
+
+/* Lang toggle: smooth cross-fade on language change so the whole UI
+   doesn't jolt when 'EN' → '繁'. View Transitions API; ignored by
+   browsers without support (Firefox at this writing). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+  animation-timing-function: ease-out;
+}
 .serif { font-family: 'Newsreader', 'Source Serif 4', Georgia, serif; font-feature-settings: 'liga','dlig'; }
 .serif-it { font-family: 'Newsreader', Georgia, serif; font-style: italic; }
 .mono  { font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
