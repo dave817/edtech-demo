@@ -50,7 +50,7 @@ export function Topbar({ lang, setLang, regularity, level, route, setRoute }: To
     >
       <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
         <span
-          className="mono"
+          className="mono section-num-label"
           style={{
             fontSize: 10.5,
             color: "var(--ink-3)",

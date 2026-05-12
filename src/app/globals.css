@@ -282,6 +282,10 @@ input, textarea { font: inherit; color: inherit; }
   /* Topbar — hide search input and secondary metrics, keep title + lang + avatar */
   .topbar-mobile-hide { display: none !important; }
 
+  /* Section number prefix is editorial chrome — on a phone it just eats
+     ~50px before the actual page title. Hide it. */
+  .section-num-label { display: none !important; }
+
   /* Library / Practice grids → 1 column */
   .card-grid-auto, .card-grid-practice { grid-template-columns: 1fr !important; }
 
