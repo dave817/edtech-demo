@@ -250,6 +250,21 @@ export function CoachesScreen({ lang, setRoute }: { lang: Lang; setRoute: (r: Ro
   );
 }
 
+// Belt-and-suspenders: if the model still emits a stray ```json block or
+// a bare top-level JSON object at the end of its reply, strip it so the
+// chat bubble shows clean prose. The system prompts already forbid this.
+function stripJunk(text: string): string {
+  let out = text;
+  // Fenced code blocks (``` … ```)
+  out = out.replace(/```[\s\S]*?```/g, "").trim();
+  // Trailing bare JSON object (e.g. {"useful_phrases": [...], ...})
+  out = out.replace(/\s*\{[\s\S]*?"\s*:\s*[\s\S]*?\}\s*$/m, (match) => {
+    // Only strip if it parses as JSON
+    try { JSON.parse(match.trim()); return ""; } catch { return match; }
+  }).trim();
+  return out || text; // never return empty — fall back to original
+}
+
 function CoachChatModal({ coachId, lang, onClose }: { coachId: CoachId | null; lang: Lang; onClose: () => void }) {
   const t = L(lang);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -389,7 +404,13 @@ function CoachChatModal({ coachId, lang, onClose }: { coachId: CoachId | null; l
               }}
             >
               <div className={`bubble ${m.role === "user" ? "bubble-user" : "bubble-bot"}`}>
-                {m.content || (streaming && i === messages.length - 1 ? <em style={{ opacity: 0.5 }}>{t.coachThinking}</em> : "")}
+                {m.content
+                  ? m.role === "assistant"
+                    ? stripJunk(m.content)
+                    : m.content
+                  : streaming && i === messages.length - 1
+                  ? <em style={{ opacity: 0.5 }}>{t.coachThinking}</em>
+                  : ""}
               </div>
             </div>
           ))}
