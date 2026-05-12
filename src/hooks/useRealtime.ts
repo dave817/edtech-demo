@@ -197,13 +197,15 @@ export function useRealtime(options: UseRealtimeOptions) {
         }
       }
 
-      // 6. SDP offer → POST directly to GA Realtime endpoint with ephemeral token
-      // IMPORTANT: bare /v1/realtime (no /calls, no ?model=). Adding either of those
-      // makes the route reject the GA ephemeral with version-mismatch or object-not-found.
+      // 6. SDP offer → POST to GA Realtime endpoint with ephemeral token
+      // Endpoint matrix (confirmed by user testing):
+      //   /v1/realtime?model=X    BETA  rejects GA client_secret (version mismatch)
+      //   /v1/realtime            BETA  same — bare endpoint also triggers beta routing
+      //   /v1/realtime/calls      GA    correct for browser WebRTC with ephemeral + SDP
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const sdpResponse = await fetch("https://api.openai.com/v1/realtime", {
+      const sdpResponse = await fetch("https://api.openai.com/v1/realtime/calls", {
         method: "POST",
         body: offer.sdp,
         headers: {
