@@ -157,21 +157,61 @@ export function WritingScreen({ lang }: { lang: Lang }) {
           </div>
         ) : (
           <div style={{ padding: "16px 22px", display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-            <div className="row gap-2">
-              {DRILL_OPTIONS.map((d) => (
+            <div className="row gap-2" style={{ justifyContent: "space-between", flexWrap: "wrap" }}>
+              <div className="row gap-2">
+                {DRILL_OPTIONS.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => setDrillType(d.id)}
+                    className="pill"
+                    style={{
+                      cursor: "pointer",
+                      background: drillType === d.id ? "var(--accent)" : "var(--surface-sunken)",
+                      color: drillType === d.id ? "var(--accent-fg)" : "var(--ink-2)",
+                    }}
+                  >
+                    {lang === "zh" ? d.label_zh : d.label_en}
+                  </button>
+                ))}
+              </div>
+              <div className="row gap-2">
                 <button
-                  key={d.id}
-                  onClick={() => setDrillType(d.id)}
-                  className="pill"
-                  style={{
-                    cursor: "pointer",
-                    background: drillType === d.id ? "var(--accent)" : "var(--surface-sunken)",
-                    color: drillType === d.id ? "var(--accent-fg)" : "var(--ink-2)",
+                  className="btn btn-ghost"
+                  onClick={async () => {
+                    try {
+                      const text = await navigator.clipboard.readText();
+                      if (text) setEssay(text);
+                    } catch {
+                      /* clipboard read blocked (no permission, no https, or unsupported) */
+                    }
                   }}
+                  style={{ fontSize: 12, padding: "6px 10px" }}
+                  title={lang === "zh" ? "從剪貼簿貼上" : "Paste from clipboard"}
                 >
-                  {lang === "zh" ? d.label_zh : d.label_en}
+                  <Icon name="download" size={12} />
+                  {lang === "zh" ? "貼上" : "Paste"}
                 </button>
-              ))}
+                {essay.length > 0 && (
+                  <button
+                    className="btn btn-ghost"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          lang === "zh"
+                            ? "確定要清除目前的草稿嗎？此動作無法復原。"
+                            : "Clear the current draft? This can't be undone.",
+                        )
+                      ) {
+                        setEssay("");
+                      }
+                    }}
+                    style={{ fontSize: 12, padding: "6px 10px" }}
+                  >
+                    <Icon name="x" size={12} />
+                    {lang === "zh" ? "清除" : "Clear"}
+                  </button>
+                )}
+              </div>
             </div>
             <textarea
               value={essay}
