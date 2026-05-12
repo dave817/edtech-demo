@@ -71,25 +71,13 @@ export function useRealtime(options: UseRealtimeOptions) {
     setSecondsLeft(SESSION_LIMIT_MS / 1000);
 
     try {
-      // 1. Mint ephemeral session
-      const sessionRes = await fetch("/api/realtime/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: options.mode,
-          accent: options.accent,
-          bandTarget: options.bandTarget,
-          strictness: options.strictness,
-        }),
-      });
-      const sessionJson = await sessionRes.json();
-      if (!sessionRes.ok) {
-        throw new Error(sessionJson.error || "Failed to start session");
-      }
-      // GA Realtime API returns the ephemeral token directly as client_secret (string, "ek_...")
-      const token: string | undefined = sessionJson?.client_secret;
-      const model: string = sessionJson?.model || "gpt-realtime-2";
-      if (!token) throw new Error("No ephemeral token returned from server");
+      // GA Realtime flow:
+      // 1. Build the WebRTC peer + mic stream locally and createOffer.
+      // 2. POST the SDP offer to OUR server (/api/realtime/sdp), which proxies it
+      //    via multipart/form-data to https://api.openai.com/v1/realtime/calls with
+      //    the session config attached. The API key stays server-side.
+      // 3. The server returns the SDP answer as plain text; we setRemoteDescription.
+      // (No ephemeral client_secret step — it's not used in this proxied flow.)
 
       // 2. WebRTC peer
       const pc = new RTCPeerConnection();
@@ -187,27 +175,31 @@ export function useRealtime(options: UseRealtimeOptions) {
         }
       }
 
-      // 6. SDP offer → POST to OpenAI Realtime GA WebRTC endpoint
-      // Beta endpoint was POST /v1/realtime?model=<model> — that path rejects GA client secrets
-      // with "API version mismatch". The GA endpoint is /v1/realtime/calls and the model is already
-      // bound to the client secret (set via session.model in client_secrets call), so no query needed.
+      // 6. SDP offer → POST to OUR server which proxies multipart to OpenAI GA endpoint
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const sdpResponse = await fetch(`https://api.openai.com/v1/realtime/calls`, {
+      const sdpResponse = await fetch("/api/realtime/sdp", {
         method: "POST",
-        body: offer.sdp,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/sdp",
-        },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sdp: offer.sdp,
+          mode: options.mode,
+          accent: options.accent,
+          bandTarget: options.bandTarget,
+          strictness: options.strictness,
+        }),
       });
       if (!sdpResponse.ok) {
-        const errText = await sdpResponse.text();
+        let errText: string;
+        try {
+          const errJson = await sdpResponse.json();
+          errText = errJson?.detail?.error?.message || errJson?.error || JSON.stringify(errJson);
+        } catch {
+          errText = await sdpResponse.text();
+        }
         throw new Error(`Realtime SDP exchange failed: ${errText}`);
       }
-      // Avoid lint: model is bound to the client secret server-side, so the value is informational only.
-      void model;
       const answerSdp = await sdpResponse.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
     } catch (err) {
