@@ -23,19 +23,30 @@ import { STUDENT } from "@/lib/seed";
 export function Shell() {
   const [tweaks, setTweak] = useTweaks();
   const [route, setRoute] = useState<Route>("today");
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-accent", tweaks.accent);
     document.documentElement.setAttribute("data-theme", tweaks.dark ? "dark" : "light");
   }, [tweaks.accent, tweaks.dark]);
 
-  // Deep link: ?screen=speaking
+  // Deep link: ?screen=speaking and demo-mode gate
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const screen = params.get("screen") as Route | null;
       const valid: Route[] = ["today", "practice", "speaking", "writing", "coaches", "library", "night", "pron", "progress", "teacher"];
       if (screen && valid.includes(screen)) setRoute(screen);
+
+      // Show demo controls (TweaksPanel) only when explicitly enabled.
+      // Default: visible in dev (committee preview), hidden in production
+      // (real students should never see procurement/region controls).
+      // Override either way with ?demo=1 or ?demo=0.
+      const demoParam = params.get("demo");
+      if (demoParam === "1") setDemoMode(true);
+      else if (demoParam === "0") setDemoMode(false);
+      else if (process.env.NEXT_PUBLIC_DEMO_MODE === "1") setDemoMode(true);
+      else if (process.env.NODE_ENV !== "production") setDemoMode(true);
     } catch {
       /* ignore */
     }
@@ -79,7 +90,7 @@ export function Shell() {
         {screens[route]}
         <Footer lang={lang} aiProvider={tweaks.aiProvider} region={tweaks.region} />
       </main>
-      <TweaksPanel tweaks={tweaks} setTweak={setTweak} setRoute={setRoute} route={route} />
+      {demoMode && <TweaksPanel tweaks={tweaks} setTweak={setTweak} setRoute={setRoute} route={route} />}
     </div>
   );
 }
