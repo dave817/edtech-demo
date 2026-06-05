@@ -65,6 +65,4 @@ export interface Tweaks {
   lang: Lang;
   dark: boolean;
   navCollapsed: boolean;
-  aiProvider: "Claude" | "OpenAI" | "Gemini" | "On-prem Llama";
-  region: string;
 }

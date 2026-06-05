@@ -10,8 +10,6 @@ const DEFAULTS: Tweaks = {
   lang: "en",
   dark: false,
   navCollapsed: false,
-  aiProvider: "Claude",
-  region: "Hong Kong (asia-east2)",
 };
 
 export function useTweaks(): [Tweaks, <K extends keyof Tweaks>(key: K, value: Tweaks[K]) => void] {

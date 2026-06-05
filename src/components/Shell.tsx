@@ -130,7 +130,7 @@ export function Shell() {
           setRoute={setRoute}
         />
         {screens[route]}
-        <Footer lang={lang} aiProvider={tweaks.aiProvider} region={tweaks.region} />
+        <Footer lang={lang} />
       </main>
       {demoMode && <TweaksPanel tweaks={tweaks} setTweak={setTweak} setRoute={setRoute} route={route} />}
       <Onboarding lang={lang} />

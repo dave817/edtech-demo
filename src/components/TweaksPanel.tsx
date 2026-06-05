@@ -17,15 +17,6 @@ const ACCENTS: Array<{ id: Tweaks["accent"]; swatch: string; label: string }> = 
   { id: "aubergine", swatch: "oklch(0.36 0.075 155)", label: "Forest" },
 ];
 
-const PROVIDERS: Tweaks["aiProvider"][] = ["Claude", "OpenAI", "Gemini", "On-prem Llama"];
-
-const REGIONS = [
-  "Hong Kong (asia-east2)",
-  "Singapore (asia-southeast1)",
-  "Tokyo (asia-northeast1)",
-  "EU (europe-west4)",
-];
-
 const JUMP: Array<{ id: Route; en: string; zh: string }> = [
   { id: "today", en: "Today", zh: "今日" },
   { id: "coaches", en: "Coaches", zh: "教練" },
@@ -157,53 +148,6 @@ export function TweaksPanel({ tweaks, setTweak, setRoute, route }: TweaksPanelPr
                   </button>
                 ))}
               </div>
-            </Section>
-
-            <Section label={lang === "zh" ? "AI 供應商" : "AI provider"}>
-              <select
-                value={tweaks.aiProvider}
-                onChange={(e) => setTweak("aiProvider", e.target.value as Tweaks["aiProvider"])}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: "1px solid var(--border-strong)",
-                  background: "var(--surface)",
-                  fontSize: 13,
-                }}
-              >
-                {PROVIDERS.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-              <p style={{ margin: "8px 0 0", fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.5 }}>
-                {lang === "zh"
-                  ? "可切換 AI 模型。實際呼叫由 OPENAI_API_KEY 決定。"
-                  : "Procurement signal. Actual model used is set by OPENAI_API_KEY."}
-              </p>
-            </Section>
-
-            <Section label={lang === "zh" ? "資料儲存地" : "Data region"}>
-              <select
-                value={tweaks.region}
-                onChange={(e) => setTweak("region", e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: "1px solid var(--border-strong)",
-                  background: "var(--surface)",
-                  fontSize: 13,
-                }}
-              >
-                {REGIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
             </Section>
 
             <Section label={lang === "zh" ? "快速跳轉" : "Jump to screen"}>
